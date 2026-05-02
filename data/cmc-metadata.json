@@ -1,0 +1,11 @@
+{
+    "Wifes_age": "Wife's age (numerical)",
+    "Wifes_education": "Wife's education (categorical) 1=low, 2=low-mid, 3=mid-high, 4=high",
+    "Husbands_education": "Husband's education (categorical) 1=low, 2=low-mid, 3=mid-high, 4=high",
+    "Number_of_children_ever_born": "Number of children ever born (numerical)",
+    "Wifes_religion": "Wife's religion (binary) 0=Non-Islam, 1=Islam",
+    "Wifes_now_working": "Wife's now working? (binary) 0=Yes, 1=No",
+    "Husbands_occupation": "Husband's occupation (categorical) 1=low, 2=low-mid, 3=mid-high, 4=high",
+    "Standard_of_living_index": "Standard-of-living index (categorical) 1=low, 2=low-mid, 3=mid-high, 4=high",
+    "Media_exposure": "Media exposure (binary) 0=Good, 1=Not good"
+}
