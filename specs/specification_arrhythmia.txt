@@ -1,0 +1,84 @@
+"""
+[PREFIX]
+
+###
+<Task>
+Distinguish between the presence and absence of cardiac arrhythmia and classify it in one of the 16 groups.
+Normal,Ischemic changes (Coronary Artery Disease),Old Anterior Myocardial Infarction,Old Inferior Myocardial Infarction,Sinus tachycardy,Sinus 1  bradycardy,Ventricular Premature Contraction (PVC),Supraventricular Premature Contraction,Left bundle branch block,Right bundle branch block,1. degree AtrioVentricular block,2. degree AV block,3. degree AV block,Left ventricule hypertrophy, Atrial Fibrillation or Flutter, Others?    
+
+###
+<Features>
+[FEATURES]
+
+###
+<Examples>
+[EXAMPLES]
+[SUFFIX]
+"""
+
+@evaluate.run
+def evaluate(data: dict):
+    """ Evaluate the feature transformations on data observations."""
+    
+    from sklearn import preprocessing
+    from sklearn.model_selection import StratifiedKFold, KFold
+    from sklearn.metrics import accuracy_score
+    from preprocessing import preprocess_datasets
+    import xgboost as xgb
+    import torch
+    import numpy as np
+
+    # Load data observations
+    label_encoder = preprocessing.LabelEncoder()
+    inputs, outputs, is_cat, is_regression = data['inputs'], data['outputs'], data['is_cat'], data['is_regression']
+    X = modify_features(inputs)
+    y = label_encoder.fit_transform(outputs)
+
+    # Encode categorical string columns
+    for col in X.columns:
+        if X[col].dtype == 'string':
+            X[col] = label_encoder.fit_transform(X[col])
+
+    # Choose cross-validation strategy
+    kf = KFold(n_splits=4, shuffle=True, random_state=42) if is_regression else StratifiedKFold(n_splits=4, shuffle=True, random_state=42)
+
+    scores = []
+
+    # 4-Fold Cross-Validation
+    for train_idx, test_idx in kf.split(X, y):
+        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+
+        X_train_new, X_test_new = preprocess_datasets(X_train, X_test, None)
+        
+        # Convert to tensors
+        X_train = torch.tensor(X_train_new.to_numpy())
+        X_test = torch.tensor(X_test_new.to_numpy())
+
+        # Load model
+        model = xgb.XGBClassifier(random_state=42)
+
+        model.fit(X_train_new, y_train)
+        
+        y_pred = model.predict(X_test_new)
+        score = accuracy_score(y_test, y_pred)
+        scores.append(score)
+
+    # Calculate average score
+    avg_score = np.mean(scores)
+
+    return avg_score, inputs, outputs
+
+
+@equation.evolve
+def modify_features(df_input) -> pd.DataFrame:
+    """
+    Thought 1: Combining QRSduration and heartrate can provide insights into the electrical activity of the heart relative to its rate. A longer QRS duration at a higher heart rate might indicate conduction issues.
+    New Feature 1: qrs_heartrate_product | qrs_heartrate_product = (QRSduration * heartrate)
+    """
+
+    df_output = df_input.copy()
+    # Calculate QRS duration-heartrate product
+    df_output['qrs_heartrate_product'] = df_output['QRSduration'] * df_output['heartrate']
+
+    return df_output

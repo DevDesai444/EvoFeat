@@ -1,0 +1,84 @@
+"""
+[PREFIX]
+
+###
+<Task>
+What is the forest cover-type? 1, 2, 3, 4, 5, 6 or 7? 
+
+###
+<Features>
+[FEATURES]
+
+###
+<Examples>
+[EXAMPLES]
+[SUFFIX]
+"""
+
+@evaluate.run
+def evaluate(data: dict):
+    """ Evaluate the feature transformations on data observations."""
+    
+    from sklearn import preprocessing
+    from sklearn.model_selection import StratifiedKFold, KFold
+    from sklearn.metrics import accuracy_score
+    from preprocessing import preprocess_datasets
+    import xgboost as xgb
+    import torch
+    import numpy as np
+
+    # Load data observations
+    label_encoder = preprocessing.LabelEncoder()
+    inputs, outputs, is_cat, is_regression = data['inputs'], data['outputs'], data['is_cat'], data['is_regression']
+    X = modify_features(inputs)
+    y = label_encoder.fit_transform(outputs)
+
+    # Encode categorical string columns
+    for col in X.columns:
+        if X[col].dtype == 'string':
+            X[col] = label_encoder.fit_transform(X[col])
+
+    # Choose cross-validation strategy
+    kf = KFold(n_splits=4, shuffle=True, random_state=42) if is_regression else StratifiedKFold(n_splits=4, shuffle=True, random_state=42)
+
+    scores = []
+
+    # 4-Fold Cross-Validation
+    for train_idx, test_idx in kf.split(X, y):
+        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_test = y[train_idx], y[test_idx]
+
+        X_train_new, X_test_new = preprocess_datasets(X_train, X_test, None)
+        
+        # Convert to tensors
+        X_train = torch.tensor(X_train_new.to_numpy())
+        X_test = torch.tensor(X_test_new.to_numpy())
+
+        # Load model
+        model = xgb.XGBClassifier(random_state=42)
+
+        model.fit(X_train_new, y_train)
+        
+        y_pred = model.predict(X_test_new)
+        score = accuracy_score(y_test, y_pred)
+        scores.append(score)
+
+    # Calculate average score
+    avg_score = np.mean(scores)
+
+    return avg_score, inputs, outputs
+
+
+@equation.evolve
+def modify_features(df_input) -> pd.DataFrame:
+    """
+    Thought 1: The difference between Horizontal Distance to Roadways and Horizontal Distance to Fire Points might indicate the relative proximity of a location to these two factors.
+    New Feature 1: distance_road_minus_fire | distance_road_minus_fire = (Horizontal_Distance_To_Roadways - Horizontal_Distance_To_Fire_Points)
+    """
+
+    df_output = df_input.copy()
+
+    # Calculate the difference between Horizontal Distance to Roadways and Horizontal Distance to Fire Points.
+    df_output['distance_road_minus_fire'] = df_output['Horizontal_Distance_To_Roadways'] - df_output['Horizontal_Distance_To_Fire_Points']
+
+    return df_output
