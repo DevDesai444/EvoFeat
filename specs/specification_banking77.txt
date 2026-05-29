@@ -1,0 +1,90 @@
+"""
+[PREFIX]
+
+###
+<Task>
+Classify a short customer banking query into one of 77 intent classes
+(banking77 schema — card_arrival, transfer_fee_charged, lost_or_stolen_card,
+etc). The base features are a mix of lexical/structural stats over the
+query string plus a tf-idf top-50 numeric block.
+
+###
+<Features>
+[FEATURES]
+
+###
+<Examples>
+[EXAMPLES]
+[SUFFIX]
+"""
+
+@evaluate.run
+def evaluate(data: dict):
+    """Score a candidate feature transform on the held fold.
+
+    Returns (score, X_transformed, y) so the buffer can reuse the
+    transformed frame as the prompt's contextual sample for the next
+    iteration."""
+
+    import numpy as np
+    import pandas as pd
+    from sklearn import preprocessing
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.metrics import accuracy_score
+    import xgboost as xgb
+
+    label_encoder = preprocessing.LabelEncoder()
+    inputs, outputs = data['inputs'], data['outputs']
+    is_regression = data.get('is_regression', False)
+    X = modify_features(inputs)
+    y = label_encoder.fit_transform(outputs) if outputs.dtype.kind in ('O', 'U', 'S') else outputs
+
+    # numeric coercion — the LLM sometimes appends weakly-typed columns
+    for col in X.columns:
+        if X[col].dtype == 'object' or str(X[col].dtype) == 'string':
+            X[col] = pd.to_numeric(X[col], errors='coerce')
+    X = X.replace([np.inf, -np.inf], np.nan).fillna(0.0).astype(float)
+
+    # cheap proxy eval — 2 folds, fewer estimators. canonical 5-fold runs
+    # in scripts/run_comparison.py and is what we report. this score is
+    # only used as the search signal, so noise tradeoff favors speed.
+    kf = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
+    scores = []
+    for tr, te in kf.split(X, y):
+        X_tr, X_te = X.iloc[tr], X.iloc[te]
+        y_tr, y_te = y[tr], y[te]
+        model = xgb.XGBClassifier(
+            random_state=42, n_estimators=60, max_depth=6,
+            learning_rate=0.1, n_jobs=2, eval_metric='mlogloss',
+            tree_method='hist', verbosity=0,
+        )
+        model.fit(X_tr, y_tr)
+        y_pred = model.predict(X_te)
+        scores.append(accuracy_score(y_te, y_pred))
+    return float(np.mean(scores)), inputs, outputs
+
+
+@equation.evolve
+def modify_features(df_input) -> pd.DataFrame:
+    """
+    Thought 1: Combining query length with question-word presence captures
+    a 'long interrogative' signal — multi-clause queries with a question
+    word often map to comparison / explanation intents.
+    New Feature 1: long_question_signal | n_tokens * starts_with_qword
+
+    Thought 2: TF-IDF columns are sparse; collapse a coarse "currency-ish"
+    signal by summing money / number / digit indicators into one dense
+    column the booster can split on cheaply.
+    New Feature 2: monetary_signal | has_money_symbol + has_number + n_digits / 10
+    """
+
+    df_output = df_input.copy()
+    df_output['long_question_signal'] = (
+        df_output['n_tokens'] * df_output['starts_with_qword']
+    )
+    df_output['monetary_signal'] = (
+        df_output['has_money_symbol']
+        + df_output['has_number']
+        + df_output['n_digits'] / 10.0
+    )
+    return df_output
