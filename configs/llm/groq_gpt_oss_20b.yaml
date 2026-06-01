@@ -1,0 +1,11 @@
+# gpt-oss-20b is a reasoning model on Groq — its `content` is empty unless
+# you give it a large max_tokens budget for the hidden chain-of-thought.
+# We bump max_tokens to 4096 so the post-reasoning code actually lands in
+# the response.
+backbone_label: gpt-oss-20b
+backend: groq
+model: openai/gpt-oss-20b
+temperature: 0.8
+max_tokens: 3500
+max_retries: 3
+timeout_s: 90

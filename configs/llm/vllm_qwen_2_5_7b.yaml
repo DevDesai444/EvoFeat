@@ -1,0 +1,11 @@
+backbone_label: qwen-2.5-7b
+backend: vllm
+model: Qwen/Qwen2.5-7B-Instruct
+base_url: http://127.0.0.1:8000/v1
+temperature: 0.8
+max_tokens: 1024
+max_retries: 4
+timeout_s: 120
+# Launch vLLM first:
+#   python -m vllm.entrypoints.openai.api_server \
+#       --model Qwen/Qwen2.5-7B-Instruct --port 8000 --max-model-len 8192
