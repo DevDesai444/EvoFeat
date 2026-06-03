@@ -1,0 +1,32 @@
+# Headline experiment: banking77 across all 4 backbones.
+# Cloud rows can run anywhere; the three vllm rows need a GPU box (Kaggle T4
+# is enough for the 7-8B set).
+dataset: banking77
+
+backbones:
+  - configs/llm/groq_gpt_oss_20b.yaml      # GPT-style cloud
+  - configs/llm/vllm_qwen_2_5_7b.yaml      # GPU
+  - configs/llm/vllm_mistral_7b_v03.yaml   # GPU
+  - configs/llm/vllm_llama_3_1_8b.yaml     # GPU
+
+search:
+  samples_per_prompt: 3
+  num_iterations: 20            # → max_samples ≈ iterations * samples_per_prompt
+  evaluate_timeout_s: 45
+  early_stop_patience: 24       # 8 prompt rounds of no improvement
+  buffer:
+    num_islands: 3
+    functions_per_prompt: 2
+    sampling_t_init: 0.1
+    sampling_t_period: 30000
+    reset_period_s: 14400
+
+baselines:
+  k: 30
+  # polynomial degree-2 on 67 inputs blows up to ~2.3k columns and pushes
+  # multiclass logreg past the patience budget on CPU; keep it gated behind
+  # the explicit `--full-baselines` flag rather than the headline sweep.
+  methods: [fisher, anova_f, mutual_info, lasso_l1, variance_thresh, rfe_xgb, combined]
+
+reporting:
+  out_dir: results

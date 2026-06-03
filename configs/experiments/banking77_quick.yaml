@@ -1,0 +1,22 @@
+# Smoke-test config used by `scripts/run_evofeat.py --quick` and by the
+# unit tests. Same shape as the full config, just much smaller.
+dataset: banking77
+
+backbones:
+  - configs/llm/groq_gpt_oss_20b.yaml
+
+search:
+  samples_per_prompt: 2
+  num_iterations: 3
+  evaluate_timeout_s: 30
+  early_stop_patience: 10
+  buffer:
+    num_islands: 2
+    functions_per_prompt: 2
+
+baselines:
+  k: 20
+  methods: [fisher, mutual_info]
+
+reporting:
+  out_dir: results/quick

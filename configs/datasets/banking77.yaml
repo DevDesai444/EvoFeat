@@ -1,0 +1,12 @@
+# banking77 dataset config
+name: banking77
+task: classification
+loader: banking77         # evofeat.data.load_banking77
+spec_path: specs/specification_banking77.txt
+n_splits: 5
+seed: 42
+tfidf_top_k: 50
+notes: |
+  Pulled from PolyAI/banking77 on HuggingFace. We extract a base tabular
+  block (lengths, NER counts, tfidf top-50) and let the LLM compose
+  derived columns on top.
