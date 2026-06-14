@@ -1,0 +1,8 @@
+backbone_label: llama-3.3-70b
+backend: groq
+model: llama-3.3-70b-versatile
+temperature: 0.8
+max_tokens: 1024
+max_retries: 3
+timeout_s: 45
+

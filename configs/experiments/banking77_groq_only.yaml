@@ -1,0 +1,30 @@
+# Subset of banking77_full.yaml that runs only the cloud backbones, so it
+# completes without a GPU box. The three vllm backbones from the full
+# config land on Kaggle separately (see notebooks/kaggle_vllm_run.ipynb)
+# and their results get merged in via run_comparison.py.
+dataset: banking77
+
+backbones:
+  - configs/llm/groq_llama_3_1_8b.yaml
+  - configs/llm/groq_llama_3_3_70b.yaml
+  - configs/llm/groq_qwen3_32b.yaml
+  - configs/llm/groq_gpt_oss_20b.yaml
+
+search:
+  samples_per_prompt: 3
+  num_iterations: 12
+  evaluate_timeout_s: 45
+  early_stop_patience: 12
+  buffer:
+    num_islands: 3
+    functions_per_prompt: 2
+    sampling_t_init: 0.1
+    sampling_t_period: 30000
+    reset_period_s: 14400
+
+baselines:
+  k: 30
+  methods: [fisher, anova_f, mutual_info, lasso_l1, variance_thresh, rfe_xgb, combined]
+
+reporting:
+  out_dir: results

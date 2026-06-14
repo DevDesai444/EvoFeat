@@ -1,0 +1,11 @@
+backbone_label: qwen3-32b
+backend: groq
+model: qwen/qwen3-32b
+temperature: 0.8
+# qwen3 is a reasoning model on Groq — give it enough budget for hidden
+# chain-of-thought + the final code.
+max_tokens: 1500
+max_retries: 3
+timeout_s: 90
+
+
