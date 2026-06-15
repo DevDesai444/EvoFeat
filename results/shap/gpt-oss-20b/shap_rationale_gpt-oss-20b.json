@@ -1,0 +1,12 @@
+{
+  "ner_money": "entity-count signal; named entities concentrate in transaction-style intents (currency, dates, places).",
+  "tfidf_rate": "tf-idf weight for the term 'rate' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_disposable": "tf-idf weight for the term 'disposable' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_refund": "tf-idf weight for the term 'refund' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_pin": "tf-idf weight for the term 'pin' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_change": "tf-idf weight for the term 'change' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_virtual": "tf-idf weight for the term 'virtual' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_identity": "tf-idf weight for the term 'identity' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_pending": "tf-idf weight for the term 'pending' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "n_digits": "feature derived by the gpt-oss-20b backbone \u2014 examine the program log for the exact construction."
+}

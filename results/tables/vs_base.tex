@@ -1,0 +1,15 @@
+\begin{tabular}{llrrrrrrrrllrr}
+\toprule
+method_a & method_b & n_folds & mean_a & mean_b & delta & ci_low & ci_high & cohen_d & t_stat & t_p & wilcoxon_p & sig_p<.05 & sig_bonferroni \\
+\midrule
+fisher & base & 5 & 0.4171 & 0.5810 & -0.1639 & -0.1715 & -0.1542 & -15.5980 & -34.8790 & <1e-4 & 0.062 & True & True \\
+anova_f & base & 5 & 0.4166 & 0.5810 & -0.1643 & -0.1726 & -0.1540 & -14.5230 & -32.4740 & <1e-4 & 0.062 & True & True \\
+mutual_info & base & 5 & 0.4994 & 0.5810 & -0.0816 & -0.0878 & -0.0741 & -9.1690 & -20.5020 & <1e-4 & 0.062 & True & True \\
+lasso_l1 & base & 5 & 0.4995 & 0.5810 & -0.0815 & -0.0889 & -0.0729 & -8.0370 & -17.9700 & <1e-4 & 0.062 & True & True \\
+variance_thresh & base & 5 & 0.5810 & 0.5810 & 0.0000 & 0.0000 & 0.0000 & 0.0000 & NaN & 1.000 & 1.000 & False & False \\
+rfe_xgb & base & 5 & 0.4174 & 0.5810 & -0.1636 & -0.1688 & -0.1584 & -25.2530 & -56.4680 & <1e-4 & 0.062 & True & True \\
+combined & base & 5 & 0.4994 & 0.5810 & -0.0816 & -0.0878 & -0.0741 & -9.1690 & -20.5020 & <1e-4 & 0.062 & True & True \\
+llm:gpt-oss-20b & base & 5 & 0.5806 & 0.5810 & -0.0004 & -0.0028 & 0.0021 & -0.1230 & -0.2750 & 0.797 & 0.688 & False & False \\
+llm:llama-3.1-8b & base & 5 & 0.5328 & 0.5810 & -0.0482 & -0.0544 & -0.0425 & -6.3600 & -14.2210 & 1.4e-04 & 0.062 & True & True \\
+\bottomrule
+\end{tabular}

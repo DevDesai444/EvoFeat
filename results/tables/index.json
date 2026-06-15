@@ -1,0 +1,12 @@
+{
+  "dataset": "banking77",
+  "metric": "accuracy",
+  "n_methods": 10,
+  "n_folds": 5,
+  "headline_table": {
+    "csv": "results/tables/headline.csv",
+    "md": "results/tables/headline.md",
+    "tex": "results/tables/headline.tex"
+  },
+  "timestamp": "2026-06-16 09:58:31"
+}
