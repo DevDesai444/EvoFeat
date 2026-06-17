@@ -13,7 +13,7 @@ The codebase is small on purpose — one package (`evofeat/`), four entry-point 
 | **Task** | 77-class intent classification on banking customer queries (PolyAI/banking77) |
 | **Base features** | 12 lexical + 5 spaCy NER + 50 TF-IDF columns derived from the raw query text |
 | **Search algorithm** | Island-based evolutionary loop (3 islands, 3 candidates / prompt, ~20 prompt iterations, early stop on no-improve) |
-| **LLM backbones** | `openai/gpt-oss-20b` and `llama-3.1-8b-instant` via Groq API; `Qwen2.5-7B`, `Mistral-7B-Instruct-v0.3`, `Llama-3.1-8B-Instruct` via vLLM (Kaggle notebook) |
+| **LLM backbones** | `openai/gpt-oss-20b` and `llama-3.1-8b-instant` via Groq API; `Qwen2.5-7B`, `Mistral-7B-Instruct-v0.3`, `Llama-3.1-8B-Instruct` via vLLM (Colab notebook) |
 | **Downstream models** | XGBoost, Logistic Regression, Random Forest — every feature set gets all three |
 | **Classical baselines** | Fisher score, ANOVA F, Mutual Information, Lasso L1, Variance Threshold, RFE+XGBoost, PolynomialFeatures, and a combined VarThresh→MI pipeline |
 | **Statistical comparison** | Paired t-tests + Wilcoxon signed-rank + bootstrap 95% CI + Cohen's d, with Bonferroni correction across all pairs |
@@ -46,7 +46,7 @@ EvoFeat/
 ├── specs/                  # per-dataset prompt templates + initial seeds
 ├── prompts/                # head/tail blocks spliced into prompts
 ├── scripts/                # run_evofeat / run_baselines / run_comparison / run_full_experiment.sh
-├── notebooks/              # Kaggle GPU notebook for vLLM-served backbones
+├── notebooks/              # Colab/Kaggle GPU notebooks for vLLM-served backbones
 ├── tests/                  # pytest unit tests (sandbox, stats, baselines, llm_builder)
 ├── data/                   # raw UCI CSVs + banking77 parquet (built by the prep script)
 └── results/                # generated tables + figures + per-run logs
@@ -86,18 +86,23 @@ To run a quick 30-evaluation smoke test:
 python scripts/run_evofeat.py --quick
 ```
 
-## vLLM-hosted backbones on Kaggle GPU
+## vLLM-hosted backbones on a cloud GPU
 
-Open `notebooks/kaggle_vllm_run.ipynb` on Kaggle, attach a T4 (or larger), set a Kaggle Secret `GH_TOKEN` holding a GitHub PAT with `repo` scope, and run all cells. The notebook will:
+The three local backbones are served with vLLM. Open
+`notebooks/colab_vllm_run.ipynb` on Google Colab with an **L4 or A100**
+runtime (vLLM's attention kernels need sm_80+; a T4 won't do), add a Colab
+secret `GH_TOKEN` holding a GitHub PAT with `repo` scope, and run all cells.
+The notebook will:
 
-1. clone the repo into `/kaggle/working/EvoFeat/`,
+1. clone the repo into `/content/EvoFeat/`,
 2. install vLLM,
-3. for each of `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3`, and `meta-llama/Meta-Llama-3.1-8B-Instruct` — spin up a vLLM OpenAI-compatible server on port 8000, run the search loop against it, tear the server down,
+3. for each of `Qwen/Qwen2.5-7B-Instruct`, `mistralai/Mistral-7B-Instruct-v0.3`, and `Meta-Llama-3.1-8B-Instruct` — spin up a vLLM OpenAI-compatible server on port 8000, run the search loop against it, tear the server down,
 4. commit `results/runs/{backbone}/` back to the repo and push.
 
-Llama-3.1 weights are gated; if you don't have an `HF_TOKEN` secret it skips that one and still gets you Qwen + Mistral runs.
-
-After the push, re-run `scripts/run_comparison.py` locally to fold the new backbones into the headline table.
+The Llama mirror (`NousResearch/...`) is un-gated, so no HF token is needed;
+set an `HF_TOKEN` secret if you'd rather pull the official `meta-llama`
+weights. After the push, re-run `scripts/run_comparison.py` locally to fold
+the new backbones into the headline table.
 
 ## How the search works (one paragraph)
 
