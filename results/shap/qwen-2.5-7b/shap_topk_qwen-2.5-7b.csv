@@ -1,0 +1,11 @@
+rank,feature,mean_abs_shap
+1,monetary_signal,10.74560546875
+2,tfidf_rate,10.5580472946167
+3,tfidf_pin,9.589031219482422
+4,tfidf_disposable,8.968433380126953
+5,tfidf_refund,8.667289733886719
+6,tfidf_identity,6.187984466552734
+7,tfidf_virtual,5.947088718414307
+8,tfidf_declined,5.491933345794678
+9,tfidf_pending,5.3912672996521
+10,n_digits,5.269537925720215

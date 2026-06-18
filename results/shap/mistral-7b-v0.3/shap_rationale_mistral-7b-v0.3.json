@@ -1,0 +1,12 @@
+{
+  "ner_money": "entity-count signal; named entities concentrate in transaction-style intents (currency, dates, places).",
+  "tfidf_rate": "tf-idf weight for the term 'rate' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_pin": "tf-idf weight for the term 'pin' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_refund": "tf-idf weight for the term 'refund' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_disposable": "tf-idf weight for the term 'disposable' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_virtual": "tf-idf weight for the term 'virtual' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_identity": "tf-idf weight for the term 'identity' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "tfidf_change": "tf-idf weight for the term 'change' \u2014 a sparse lexical signal the booster can split on at a fixed threshold.",
+  "has_money_symbol": "feature derived by the mistral-7b-v0.3 backbone \u2014 examine the program log for the exact construction.",
+  "tfidf_declined": "tf-idf weight for the term 'declined' \u2014 a sparse lexical signal the booster can split on at a fixed threshold."
+}

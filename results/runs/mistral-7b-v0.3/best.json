@@ -1,0 +1,17 @@
+{
+  "backbone": "mistral-7b-v0.3",
+  "model_id": "mistralai/Mistral-7B-Instruct-v0.3",
+  "family": "mistralai",
+  "dataset": "banking77",
+  "elapsed_s": 2393.9,
+  "best_score": 0.5520140205390722,
+  "llm_stats": {
+    "prompt_tokens": 257739,
+    "completion_tokens": 38203,
+    "total_tokens": 295942,
+    "requests": 60,
+    "failures": 0,
+    "latency_s": 2247.02
+  },
+  "best_program": "def modify_features(df_input) -> pd.DataFrame:\n    \"\"\"\n    Thought 1: Combining query length with question-word presence captures\n    a 'long interrogative' signal \u2014 multi-clause queries with a question\n    word often map to comparison / explanation intents.\n    New Feature 1: long_question_signal | n_tokens * starts_with_qword\n\n    Thought 2: TF-IDF columns are sparse; collapse a coarse \"currency-ish\"\n    signal by summing money / number / digit indicators into one dense\n    column the booster can split on cheaply.\n    New Feature 2: monetary_signal | has_money_symbol + has_number + n_digits / 10\n    \"\"\"\n    import pandas as pd\n    import numpy as np\n    \"\"\"\n    Thought 1: Combining query length with question-word presence captures\n    a 'long interrogative' signal \u2014 multi-clause queries with a question\n    word often map to comparison / explanation intents.\n    New Feature 1: long_question_signal | n_tokens * starts_with_qword\n\n    Thought 2: Query length and lexical richness can indicate the level of\n    detail customers provide, potentially relevant to specific intent types.\n    New Feature 2: query_complexity | sqrt(n_chars) * type_token_ratio\n\n    Thought 3: Summing money/number/digit indicators into one dense column\n    is a simplistic approach. Instead, leverage the frequency of these\n    indicators to create more informative features.\n    New Feature 3: monetary_frequency | Frequency('has_money_symbol') + Frequency('has_number') + Frequency(n_digits > 0)\n\n    Thought 4: The sigmoid function can help normalize the monetary_frequency\n    to a useful scale for the model.\n    New Feature 4: normalized_monetary_signal | sigmoid(monetary_frequency)\n    \"\"\"\n    from scipy.special import expit\n\n    df_output = df_input.copy()\n    df_output['long_question_signal'] = (\n        df_output['n_tokens'] * df_output['starts_with_qword']\n    )\n    df_output['query_complexity'] = (\n        df_output['n_chars'].apply(lambda x: x ** 0.5) * df_output['type_token_ratio']\n    )\n    df_output['monetary_frequency'] = (\n        df_input['has_money_symbol'].astype(int).value_counts(normalize=True)\n        + df_input['has_number'].astype(int).value_counts(normalize=True)\n        + df_input.loc[df_input['n_digits'] > 0, 'n_digits'].astype(int).value_counts(normalize=True)\n    )\n    df_output['normalized_monetary_signal'] = expit(df_output['monetary_frequency'])\n    return df_output"
+}

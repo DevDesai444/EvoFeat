@@ -1,0 +1,8 @@
+{
+  "prompt_tokens": 257739,
+  "completion_tokens": 38203,
+  "total_tokens": 295942,
+  "requests": 60,
+  "failures": 0,
+  "latency_s": 2247.02
+}

@@ -1,3 +1,6 @@
 backbone,backend,in_tokens,out_tokens,requests,latency_s,usd,accuracy,acc_per_usd,notes
 gpt-oss-20b,groq,0,0,11,0.0,0.0,0.5806,inf,
+qwen-2.5-7b,vllm,248418,36003,60,2095.2,0.4656,0.5805,1.2468,L4 @ $0.80/hr
+mistral-7b-v0.3,vllm,257739,38203,60,2247.0,0.4993,0.5797,1.161,L4 @ $0.80/hr
+llama-3.1-8b-instruct,vllm,242901,41342,60,2554.1,0.5676,0.5795,1.021,L4 @ $0.80/hr
 llama-3.1-8b,groq,135208,23279,35,57.1,0.0086,0.5328,61.948,

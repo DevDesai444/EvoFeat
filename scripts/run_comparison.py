@@ -172,13 +172,15 @@ def main():
             stats = json.load(f)
         with open(best_path) as f:
             best = json.load(f)
-        backend = "vllm" if best.get("family") in ("qwen", "mistral", "llama") and "vllm" in best.get("model_id", "") else "groq"
-        if best.get("model_id", "").startswith(("Qwen/", "mistralai/", "meta-llama/")):
-            backend = "vllm"
+        # vLLM-served checkpoints carry an org-prefixed HF id; the Groq
+        # cloud models are the gpt-oss / *-instant ids in the registry.
+        vllm_orgs = ("Qwen/", "mistralai/", "meta-llama/", "NousResearch/")
+        backend = "vllm" if best.get("model_id", "").startswith(vllm_orgs) else "groq"
         if backend == "groq":
             est = cloud_estimate(backbone_label, best["model_id"], stats)
         else:
-            est = gpu_estimate(backbone_label, stats, gpu="T4")
+            # the vLLM backbones were served on an L4
+            est = gpu_estimate(backbone_label, stats, gpu="L4")
         estimates.append(est)
         accs_for_pareto[backbone_label] = (
             float(aggregates[method_name].get(metric, [float("nan")])[0])

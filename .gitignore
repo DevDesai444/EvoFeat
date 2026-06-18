@@ -20,7 +20,7 @@ dist/
 .ipynb_checkpoints/
 
 logs/
-runs/
+/runs/
 results/raw/
 results/cache/
 *.log

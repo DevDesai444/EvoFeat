@@ -1,0 +1,17 @@
+{
+  "backbone": "qwen-2.5-7b",
+  "model_id": "Qwen/Qwen2.5-7B-Instruct",
+  "family": "qwen",
+  "dataset": "banking77",
+  "elapsed_s": 2975.1,
+  "best_score": 0.5549949706974949,
+  "llm_stats": {
+    "prompt_tokens": 248418,
+    "completion_tokens": 36003,
+    "total_tokens": 284421,
+    "requests": 60,
+    "failures": 0,
+    "latency_s": 2095.19
+  },
+  "best_program": "def modify_features(df_input) -> pd.DataFrame:\n    \"\"\"\n    Thought 1: Combining query length with question-word presence captures\n    a 'long interrogative' signal \u2014 multi-clause queries with a question\n    word often map to comparison / explanation intents.\n    New Feature 1: long_question_signal | n_tokens * starts_with_qword\n\n    Thought 2: TF-IDF columns are sparse; collapse a coarse \"currency-ish\"\n    signal by summing money / number / digit indicators into one dense\n    column the booster can split on cheaply.\n    New Feature 2: monetary_signal | has_money_symbol + has_number + n_digits / 10\n    \"\"\"\n    import pandas as pd\n    import numpy as np\n    \"\"\"\n    Thought 1: Combining query length with question-word presence captures\n    a 'long interrogative' signal \u2014 multi-clause queries with a question\n    word often map to comparison / explanation intents.\n    New Feature 1: long_question_signal | n_tokens * starts_with_qword\n\n    Thought 2: TF-IDF columns are sparse; collapse a coarse \"currency-ish\"\n    signal by summing money / number / digit indicators into one dense\n    column the booster can split on cheaply.\n    New Feature 2: monetary_signal | has_money_symbol + has_number + n_digits / 10\n\n    Thought 3: Analyze the frequency of named entities to infer context.\n    New Feature 3: entity_frequency | (ner_money + ner_date + ner_gpe + ner_org) / 4\n\n    Thought 4: Incorporate a logarithmic scale for term frequency to capture\n    rare but important terms.\n    New Feature 4: log_tfidf | log1p(tfidf_card + tfidf_account + tfidf_transfer + tfidf_fee)\n\n    Thought 5: Use the absolute difference between 'card' and 'card payment'\n    to highlight the importance of specific terms.\n    New Feature 5: abs_diff_card | abs(tfidf_card - tfidf_card payment)\n\n    Thought 6: Calculate the ratio of unique tokens to total tokens to capture\n    lexical diversity.\n    New Feature 6: lexical_diversity_ratio | type_token_ratio / (1 + n_tokens)\n    \"\"\"\n    df_output = df_input.copy()\n\n    df_output['long_question_signal'] = (\n        df_output['n_tokens'] * df_output['starts_with_qword']\n    )\n    df_output['monetary_signal'] = (\n        df_output['has_money_symbol']\n        + df_output['has_number']\n        + df_output['n_digits'] / 10.0\n    )\n    df_output['entity_frequency'] = (\n        df_output['ner_money']\n        + df_output['ner_date']\n        + df_output['ner_gpe']\n        + df_output['ner_org']\n    ) / 4\n    df_output['log_tfidf'] = np.log1p(\n        df_output[['tfidf_card', 'tfidf_account', 'tfidf_transfer', 'tfidf_fee']].sum(axis=1)\n    )\n    df_output['abs_diff_card'] = np.abs(\n        df_output['tfidf_card'] - df_output['tfidf_card payment']\n    )\n    df_output['lexical_diversity_ratio'] = df_output['type_token_ratio'] / (1 + df_output['n_tokens'])\n\n    return df_output"
+}

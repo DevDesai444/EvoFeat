@@ -108,23 +108,46 @@ the new backbones into the headline table.
 
 The buffer keeps three "islands" of program clusters. Each cluster is a set of programs with the same per-fold score signature; islands evolve independently but the weakest half resets every few hours, reseeded from the survivors. Each iteration: pick an island, draw `functions_per_prompt` programs softmax-weighted by cluster score, render them into the prompt template with the dataset metadata + a handful of sample rows + the previous best, ask the LLM for `samples_per_prompt` continuations, parse the function body out of each response, run it in a SIGALRM-guarded subprocess against the training fold, and feed back the resulting score (or the exception traceback) on the next round. A candidate that calls its own ancestor (e.g. `modify_features_v3` calling `modify_features_v2`) is rejected so the population can't smuggle prior work into a "new" program.
 
-## Reproducing the headline table
+## Results
 
-After a full run, `results/tables/headline.md` looks like:
+Banking77, 77-class accuracy under XGBoost, 5-fold stratified CV. Full table
+in [results/tables/headline.md](results/tables/headline.md):
 
-```
-| method                 | n_folds |   mean |    std |    min |    max |
-|------------------------|---------|--------|--------|--------|--------|
-| llm:llama-3.1-8b       |       5 | 0.xxxx | 0.0xxx | 0.xxxx | 0.xxxx |
-| llm:gpt-oss-20b        |       5 | 0.xxxx | 0.0xxx | 0.xxxx | 0.xxxx |
-| ...                    |       5 |   ...  |   ...  |   ...  |   ...  |
-| combined               |       5 | 0.xxxx | 0.0xxx | 0.xxxx | 0.xxxx |
-| base                   |       5 | 0.xxxx | 0.0xxx | 0.xxxx | 0.xxxx |
-```
+| method (feature set)        | accuracy (mean ± std) |
+|-----------------------------|-----------------------|
+| base (TF-IDF + lex + NER)   | 0.5810 ± 0.0063 |
+| variance_thresh             | 0.5810 ± 0.0063 |
+| **llm: gpt-oss-20b**        | **0.5806 ± 0.0071** |
+| **llm: qwen-2.5-7b**        | **0.5805 ± 0.0096** |
+| **llm: mistral-7b-v0.3**    | **0.5797 ± 0.0081** |
+| **llm: llama-3.1-8b-instruct** | **0.5795 ± 0.0109** |
+| llm: llama-3.1-8b-instant   | 0.5328 ± 0.0093 |
+| lasso_l1                    | 0.4995 ± 0.0083 |
+| mutual_info / combined      | 0.4994 ± 0.0121 |
+| rfe_xgb                     | 0.4174 ± 0.0035 |
+| fisher                      | 0.4171 ± 0.0064 |
+| anova_f                     | 0.4166 ± 0.0071 |
 
-And `results/tables/pairwise_stats.md` has the paired t-test + Wilcoxon p-values, bootstrap 95% CI on Δ, and Cohen's d for every (method_a, method_b) pair, with Bonferroni-corrected verdicts.
+Backbones: `gpt-oss-20b` and `llama-3.1-8b-instant` via Groq; `qwen-2.5-7b`,
+`mistral-7b-v0.3`, `llama-3.1-8b-instruct` via vLLM on an L4.
 
-The actual numbers from the most recent run are written verbatim by `run_comparison.py` — they're not in this README because they shift slightly run-to-run (the LLM sampler is non-deterministic). See [results/tables/headline.md](results/tables/headline.md).
+**What the numbers say.** On this base feature set the four strong backbones
+(gpt-oss, Qwen-2.5, Mistral, Llama-3.1-8B-Instruct) all land within noise of
+the raw features — their evolved features *match* a carefully built TF-IDF +
+lexical + NER block but don't significantly beat it (paired t vs base:
+p = 0.5–0.8, see [vs_base.md](results/tables/vs_base.md)). The classical
+selection methods (Fisher, ANOVA, MI, Lasso, RFE) all *hurt* here — dropping
+columns from an already-compact 67-feature set discards signal. The one
+clear loser among the LLMs is the small `llama-3.1-8b-instant`, which
+generated far fewer valid programs. So the honest headline is: on a
+well-constructed base set, LLM feature engineering holds serve across model
+families rather than delivering a large lift — and the bigger/stronger the
+backbone, the closer it gets.
+
+`results/tables/pairwise_stats.md` has paired t-test + Wilcoxon p-values,
+bootstrap 95% CI on Δ, and Cohen's d for every method pair, Bonferroni
+corrected. Numbers shift slightly run-to-run (the sampler is stochastic);
+`run_comparison.py` rewrites all tables from the committed run artifacts.
 
 ## Datasets
 

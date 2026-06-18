@@ -41,6 +41,7 @@ DEFAULT_PRICES_USD_PER_MTOKEN = {
 DEFAULT_GPU_HOURLY_USD = {
     "T4":         0.35,
     "P100":       0.60,
+    "L4":         0.80,
     "A10":        1.00,
     "A100-40gb":  2.20,
     "A100-80gb":  3.20,
