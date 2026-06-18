@@ -1,6 +1,10 @@
 backbone_label: llama-3.1-8b-instruct
 backend: vllm
-model: meta-llama/Meta-Llama-3.1-8B-Instruct
+# the model name here must match what vLLM is launched with — we serve the
+# open NousResearch mirror (same weights, no gating). swap to
+# meta-llama/Meta-Llama-3.1-8B-Instruct only if you launched vLLM with that
+# and have an HF token.
+model: NousResearch/Meta-Llama-3.1-8B-Instruct
 base_url: http://127.0.0.1:8000/v1
 temperature: 0.8
 max_tokens: 768
@@ -8,4 +12,4 @@ max_retries: 4
 timeout_s: 120
 # Launch vLLM first:
 #   python -m vllm.entrypoints.openai.api_server \
-#       --model meta-llama/Meta-Llama-3.1-8B-Instruct --port 8000 --max-model-len 8192
+#       --model NousResearch/Meta-Llama-3.1-8B-Instruct --port 8000 --max-model-len 8192
